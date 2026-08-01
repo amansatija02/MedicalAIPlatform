@@ -5,9 +5,14 @@ __pycache__/
 .env
 
 logs/
+*.log
+
 saved_models/
+*.keras 
 
 .ipynb_checkpoints/
 
 .DS_Store
 Thumbs.db
+
+data/raw/

@@ -7,4 +7,4 @@ matplotlib
 scikit-learn
 pillow
 python-dotenv
-google-generativeai
+google-genai
