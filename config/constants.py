@@ -14,13 +14,47 @@ DATABASE_PATH = PROJECT_ROOT / "medical_ai.db"
 
 IMAGE_SIZE = (224, 224)
 
+SUPPORTED_UPLOAD_EXTENSIONS = {".jpg", ".jpeg", ".png", ".pdf"}
 SUPPORTED_IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png"}
+
+SUPPORTED_DISEASES = ("Brain Tumor", "Pneumonia", "Diabetic Retinopathy")
 
 MODEL_FILES = {
     "Brain Tumor": "brain_tumor.keras",
     "Pneumonia": "pneumonia.keras",
     "Diabetic Retinopathy": "diabetic_retinopathy.keras",
 }
+
+PREDICTION_CLASSES = {
+    "Brain Tumor": ["Glioma", "Meningioma", "No Tumor", "Pituitary"],
+    "Pneumonia": ["Normal", "Pneumonia"],
+    "Diabetic Retinopathy": ["No DR", "Mild", "Moderate", "Severe", "Proliferative DR"]
+}
+
+RISK_MAPPING = {
+    "Brain Tumor" : {
+        "No Tumor" : "Low",
+        "Glioma" : "High",
+        "Meningioma" : "Moderate",
+        "Pituitary" : "Moderate"
+    },
+    
+    "Pneumonia" : {
+        "Normal" : "Low",
+        "Pneumonia" : "High"
+    },
+    
+    "Diabetic Retinopathy": {
+        "No DR": "Low",
+        "Mild": "Moderate",
+        "Moderate": "Moderate",
+        "Severe": "High",
+        "Proliferative DR": "High"
+    }    
+}
+
+LOW_CONFIDENCE_THRESHOLD = 70
+HIGH_CONFIDENCE_THRESHOLD = 90
 
 RANDOM_SEED = 42
 
