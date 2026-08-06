@@ -56,11 +56,14 @@ RISK_MAPPING = {
 LOW_CONFIDENCE_THRESHOLD = 70
 HIGH_CONFIDENCE_THRESHOLD = 90
 
-RANDOM_SEED = 42
-
 LOG_FILE_NAME = "medical_ai.log"
 
 LOG_FORMAT = (
     "%(asctime)s | %(levelname)s | "
     "%(filename)s:%(lineno)d | %(message)s"
 )
+
+TRAIN_SPLIT = 0.70
+VALIDATION_SPLIT = 0.15
+TEST_SPLIT = 0.15
+RANDOM_SEED = 42
