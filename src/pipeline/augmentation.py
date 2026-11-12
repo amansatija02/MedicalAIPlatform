@@ -1,19 +1,20 @@
-import tensorflow as tf 
+from tensorflow.keras import layers, Sequential
 
-def get_data_augmentation() -> tf.keras.Sequential:
-    return tf.keras.Sequential(
+
+def get_data_augmentation() -> Sequential:
+    """Light augmentation for scans. It is only used on training images
+    (see create_dataset in main.py), never on validation or test data.
+
+    The input here is still in the 0-255 range, ResNet50 scaling is applied after this."""
+
+    # Strong changes can hide the very thing the model has to find
+    # (a small tumor, a faint lesion), so every value is kept small.
+    return Sequential(
         [
-            # Randomly flip the image horizontally.
-            tf.keras.layers.RandomFlip("horizontal"),
-            
-            # Rotate the image slightly to improve robustness.
-            tf.keras.layers.RandomRotation(0.05),
-            
-            # Randomly zoom in or out within a small range.
-            tf.keras.layers.RandomZoom(0.10),
-            
-            # Shift the image slightly in both directions.
-            tf.keras.layers.RandomTranslation(height_factor= 0.05, width_factor= 0.05)    
+            layers.RandomFlip("horizontal"),
+            layers.RandomRotation(0.05),
+            layers.RandomZoom(0.10),
+            layers.RandomContrast(0.10),
         ],
-        name = "data_augmentation",
+        name="data_augmentation"
     )

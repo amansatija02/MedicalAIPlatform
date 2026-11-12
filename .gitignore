@@ -15,4 +15,5 @@ saved_models/
 .DS_Store
 Thumbs.db
 
-data/raw/
+data/
+.pytest_cache/

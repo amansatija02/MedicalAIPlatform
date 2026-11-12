@@ -1,47 +1,38 @@
+from contextlib import closing
 from pathlib import Path
-from src.database.db_handler import get_database_connection
+from src.database.db_handler import get_database_connection, initialize_database
 from src.utils.exception import DatabaseException
 from src.utils.logger import logger
 
 def create_report_table() -> None:
-    try:
-        conn = get_database_connection()
-        cursor = conn.cursor()
-        cursor.execute(
-            """
-            CREATE TABLE IF NOT EXISTS report_history(
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                disease TEXT NOT NULL,
-                prediction TEXT NOT NULL,
-                report TEXT NOT NULL,
-                image_path TEXT NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP 
-            )           
-            """
-        )
-        conn.commit()
-        conn.close()
-        logger.info("Report table is ready.")
+    # both tables are created together in db_handler
+    initialize_database()
 
-    except Exception as e:
-        logger.exception("Failed to create report table.")
-        raise DatabaseException("Unable to create report table.") from e
 
-def save_report(disease: str, prediction: str, report: str, image_path: Path) -> None:
+def save_report(disease: str, prediction: str, report: str, image_path: Path) -> int:
+    """Saves one report and returns its id."""
     try:
-        conn = get_database_connection()
-        cursor = conn.cursor()
-        cursor.execute(
-            """
-            INSERT INTO report_history
-            (disease, prediction, report, image_path)
-            VALUES (?, ?, ?, ?)
-            """,
-            (disease, prediction, report, str(image_path))
-        )
-        conn.commit()
-        conn.close()
+        # report column is NOT NULL, an empty AI response should fail with a clear message
+        if report is None or not report.strip():
+            raise DatabaseException("Report is empty, nothing to save.")
+
+        with closing(get_database_connection()) as conn:
+            with conn:
+                cursor = conn.execute(
+                    """
+                    INSERT INTO report_history
+                    (disease, prediction, report, image_path)
+                    VALUES (?, ?, ?, ?)
+                    """,
+                    (disease, prediction, report, str(image_path))
+                )
+                report_id = cursor.lastrowid
+
         logger.info("Medical report saved successfully.")
+        return report_id
+
+    except DatabaseException:
+        raise
 
     except Exception as e:
         logger.exception("Failed to save medical report.")
@@ -50,17 +41,15 @@ def save_report(disease: str, prediction: str, report: str, image_path: Path) ->
 
 def get_reports() -> list:
     try:
-        conn = get_database_connection()
-        cursor = conn.cursor()
-        cursor.execute(
-            """
-            SELECT id, disease, prediction, report, image_path, created_at
-            FROM report_history
-            ORDER BY created_at DESC
-            """
-        )
-        reports = cursor.fetchall()
-        conn.close()
+        with closing(get_database_connection()) as conn:
+            reports = conn.execute(
+                """
+                SELECT id, disease, prediction, report, image_path, created_at
+                FROM report_history
+                ORDER BY created_at DESC, id DESC
+                """
+            ).fetchall()
+
         logger.info("Medical reports loaded successfully.")
         return reports
 
